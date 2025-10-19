@@ -7,6 +7,7 @@ import com.willfp.eco.core.display.DisplayModule
 import com.willfp.eco.core.integrations.IntegrationLoader
 import com.willfp.eco.core.integrations.afk.AFKManager
 import com.willfp.eco.core.items.Items
+import com.willfp.eco.util.ClassUtils
 import com.willfp.libreforge.commands.CommandLibreforge
 import com.willfp.libreforge.configs.ChainsYml
 import com.willfp.libreforge.configs.TagsYml
@@ -17,24 +18,39 @@ import com.willfp.libreforge.effects.arguments.custom.CustomEffectArguments
 import com.willfp.libreforge.effects.impl.bossbar.BossBarProgressPlaceholder
 import com.willfp.libreforge.integrations.auraskills.AuraSkillsIntegration
 import com.willfp.libreforge.integrations.aureliumskills.AureliumSkillsIntegration
-import com.willfp.libreforge.integrations.axenvoy.AxEnvoyIntegration
+import com.willfp.libreforge.integrations.axplugins.axenvoy.AxEnvoyIntegration
+import com.willfp.libreforge.integrations.axplugins.axtrade.AxTradeIntegration
 import com.willfp.libreforge.integrations.citizens.CitizensIntegration
 import com.willfp.libreforge.integrations.custombiomes.impl.CustomBiomesTerra
 import com.willfp.libreforge.integrations.custombiomes.impl.CustomBiomesTerraformGenerator
+import com.willfp.libreforge.integrations.edprisoncore.EdPrisonCoreIntegration
 import com.willfp.libreforge.integrations.fancynpcs.FancyNPCsIntegration
+import com.willfp.libreforge.integrations.huskintegration.huskclaims.HuskClaimsIntegration
+import com.willfp.libreforge.integrations.huskintegration.husktowns.HuskTownsIntegration
 import com.willfp.libreforge.integrations.jobs.JobsIntegration
+import com.willfp.libreforge.integrations.lands.LandsIntegration
 import com.willfp.libreforge.integrations.levelledmobs.LevelledMobsIntegration
 import com.willfp.libreforge.integrations.mcmmo.McMMOIntegration
 import com.willfp.libreforge.integrations.modelengine.ModelEngineIntegration
+import com.willfp.libreforge.integrations.mythicmobs.MythicMobsIntegration
 import com.willfp.libreforge.integrations.paper.PaperIntegration
+import com.willfp.libreforge.integrations.purpur.PurpurIntegration
 import com.willfp.libreforge.integrations.scyther.ScytherIntegration
 import com.willfp.libreforge.integrations.tab.TabIntegration
 import com.willfp.libreforge.integrations.tmmobcoins.TMMobcoinsIntegration
+import com.willfp.libreforge.integrations.ultimatemobcoins.UltimateMobCoinsIntegration
 import com.willfp.libreforge.integrations.vault.VaultIntegration
 import com.willfp.libreforge.integrations.votifier.VotifierIntegration
 import com.willfp.libreforge.integrations.worldguard.WorldGuardIntegration
+import com.willfp.libreforge.integrations.xiaomomiplugins.customcrops.CustomCropsIntegration
+import com.willfp.libreforge.integrations.xiaomomiplugins.customfishing.CustomFishingIntegration
 import com.willfp.libreforge.levels.LevelTypes
-import com.willfp.libreforge.levels.placeholder.*
+import com.willfp.libreforge.levels.placeholder.ItemDataPlaceholder
+import com.willfp.libreforge.levels.placeholder.ItemLevelPlaceholder
+import com.willfp.libreforge.levels.placeholder.ItemPointsPlaceholder
+import com.willfp.libreforge.levels.placeholder.ItemProgressPlaceholder
+import com.willfp.libreforge.levels.placeholder.ItemXPPlaceholder
+import com.willfp.libreforge.levels.placeholder.ItemXPRequiredPlaceholder
 import com.willfp.libreforge.placeholders.CustomPlaceholders
 import com.willfp.libreforge.tags.CustomTag
 import com.willfp.libreforge.triggers.DispatchedTriggerFactory
@@ -87,6 +103,12 @@ class LibreforgeSpigotPlugin : EcoPlugin() {
         if (Prerequisite.HAS_PAPER.isMet) {
             PaperIntegration.load(this)
         }
+
+        if (ClassUtils.exists("org.purpurmc.purpur.event.inventory.AnvilTakeResultEvent")
+        ) {
+            PurpurIntegration.load(this)
+        }
+
 
         pointsPlaceholder(this).register()
         globalPointsPlaceholder(this).register()
@@ -197,9 +219,18 @@ class LibreforgeSpigotPlugin : EcoPlugin() {
             IntegrationLoader("Terra") { CustomBiomesTerra.load(this) },
             IntegrationLoader("TerraformGenerator") { CustomBiomesTerraformGenerator.load(this) },
             IntegrationLoader("AxEnvoy") { AxEnvoyIntegration.load(this) },
+            IntegrationLoader("AxTrade") { AxTradeIntegration.load(this) },
             IntegrationLoader("Votifier") { VotifierIntegration.load(this) },
             IntegrationLoader("ModelEngine") { ModelEngineIntegration.load(this) },
-            IntegrationLoader("FancyNpcs") { FancyNPCsIntegration.load(this) }
+            IntegrationLoader("FancyNpcs") { FancyNPCsIntegration.load(this) },
+            IntegrationLoader("UltimateMobCoins") { UltimateMobCoinsIntegration.load(this) },
+            IntegrationLoader("HuskTowns") { HuskTownsIntegration.load(this) },
+            IntegrationLoader("HuskClaims") { HuskClaimsIntegration.load(this) },
+            IntegrationLoader("CustomCrops") { CustomCropsIntegration.load(this) },
+            IntegrationLoader("CustomFishing") { CustomFishingIntegration.load(this) },
+            IntegrationLoader("Lands") { LandsIntegration.load(this) },
+            IntegrationLoader("EdPrison") { EdPrisonCoreIntegration.load(this) },
+            IntegrationLoader("MythicMobs") { MythicMobsIntegration.load(this) }
         )
     }
 
@@ -214,10 +245,6 @@ class LibreforgeSpigotPlugin : EcoPlugin() {
         return listOf(
             displayModule
         )
-    }
-
-    override fun getMinimumEcoVersion(): String {
-        return "6.73.0"
     }
 
     /**

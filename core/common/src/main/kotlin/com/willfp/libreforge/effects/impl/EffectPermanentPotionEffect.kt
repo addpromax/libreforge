@@ -1,6 +1,5 @@
 package com.willfp.libreforge.effects.impl
 
-import com.willfp.eco.core.Prerequisite
 import com.willfp.eco.core.config.interfaces.Config
 import com.willfp.libreforge.Dispatcher
 import com.willfp.libreforge.NoCompileData
@@ -36,29 +35,30 @@ object EffectPermanentPotionEffect : Effect<NoCompileData>("permanent_potion_eff
 
     private val metaKey = "libreforge_${this.id}"
 
-    private val duration = if (Prerequisite.HAS_1_19_4.isMet) {
-        -1
-    } else {
-        1_500_000_000
-    }
+    private const val DURATION = -1
+
+    data class PotionEffectData(
+        val effectType: PotionEffectType,
+        val level: Int,
+        val particles: Boolean,
+        val icon: Boolean
+    )
 
     @EventHandler
     fun onRespawn(event: PlayerRespawnEvent) {
         val player = event.player
 
         val meta = player.getMetadata(metaKey).firstOrNull()?.value()
-                as? MutableMap<UUID, Pair<PotionEffectType, Int>> ?: mutableMapOf()
+                as? MutableMap<UUID, PotionEffectData> ?: mutableMapOf()
 
-        for ((_, pair) in meta) {
-            val (effectType, level) = pair
-
+        for ((_, data) in meta) {
             val effect = PotionEffect(
-                effectType,
-                duration,
-                level,
+                data.effectType,
+                DURATION,
+                data.level,
                 false,
-                false,
-                true
+                data.particles,
+                data.icon
             )
 
             player.addPotionEffect(effect)
@@ -79,22 +79,24 @@ object EffectPermanentPotionEffect : Effect<NoCompileData>("permanent_potion_eff
             ?: PotionEffectType.LUCK
 
         val level = config.getIntFromExpression("level", player) - 1
+        val icon = config.getBoolOrNull("icon") ?: true
+        val particles = config.getBoolOrNull("particles") ?: true
 
         val effect = PotionEffect(
             effectType,
-            duration,
+            DURATION,
             level,
             false,
-            false,
-            true
+            particles,
+            icon
         )
 
         player.addPotionEffect(effect)
 
         val meta = player.getMetadata(metaKey).firstOrNull()?.value()
-                as? MutableMap<UUID, Pair<PotionEffectType, Int>> ?: mutableMapOf()
+                as? MutableMap<UUID, PotionEffectData> ?: mutableMapOf()
 
-        meta[identifiers.uuid] = Pair(effectType, level)
+        meta[identifiers.uuid] = PotionEffectData(effectType, level, particles, icon)
 
         player.setMetadata(metaKey, plugin.metadataValueFactory.create(meta))
     }
@@ -103,25 +105,19 @@ object EffectPermanentPotionEffect : Effect<NoCompileData>("permanent_potion_eff
         val player = dispatcher.get<Player>() ?: return
 
         val meta = player.getMetadata(metaKey).firstOrNull()?.value()
-                as? MutableMap<UUID, Pair<PotionEffectType, Int>> ?: mutableMapOf()
+                as? MutableMap<UUID, PotionEffectData> ?: mutableMapOf()
 
-        val (toRemove, _) = meta[identifiers.uuid] ?: return
+        val data = meta[identifiers.uuid] ?: return
 
-        val active = player.getPotionEffect(toRemove) ?: return
+        val active = player.getPotionEffect(data.effectType) ?: return
 
-        if (Prerequisite.HAS_1_19_4.isMet) {
-            if (active.duration != -1) {
-                return
-            }
-        } else {
-            if (active.duration < 1_000_000_000) {
-                return
-            }
+        if (active.duration < 0) {
+            return
         }
 
         meta.remove(identifiers.uuid)
         player.setMetadata(metaKey, plugin.metadataValueFactory.create(meta))
 
-        player.removePotionEffect(toRemove)
+        player.removePotionEffect(data.effectType)
     }
 }

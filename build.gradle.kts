@@ -29,11 +29,17 @@ allprojects {
         mavenCentral()
         maven("https://repo.auxilor.io/repository/maven-public/")
         maven("https://repo.papermc.io/repository/maven-public/")
+        maven("https://repo.purpurmc.org/snapshots")
         maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
         maven("https://repo.codemc.io/repository/maven-public/")
         maven("https://maven.enginehub.org/repo/")
         maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
         maven("https://maven.citizensnpcs.co/repo")
+        maven("https://repo.networkmanager.xyz/repository/maven-public/")
+        maven("https://repo.william278.net/releases")
+        maven("https://repo.momirealms.net/releases/")
+        maven("https://repo.artillex-studios.com/releases/")
+        maven("https://mvn.lumine.io/repository/maven-public/")
     }
 
     dependencies {
@@ -65,12 +71,12 @@ allprojects {
 
         withType<JavaCompile> {
             options.encoding = "UTF-8"
-            options.release = 17
+            options.release = 21
         }
 
         withType<KotlinCompile> {
             compilerOptions {
-                jvmTarget.set(JvmTarget.JVM_17)
+                jvmTarget.set(JvmTarget.JVM_21)
             }
         }
 
